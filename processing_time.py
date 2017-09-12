@@ -30,7 +30,7 @@ def processCsv(csv_filename):
     return samples
   except:
     print('processCsv: Error processing csv file')
-    #exit(1)
+    exit(1)
   
 def summaryStats(samples):
   ##
@@ -40,7 +40,7 @@ def summaryStats(samples):
     raw_proc_times = deepcopy(samples['processing_time'])
   except KeyError:
     print('summaryStats: Error, unable to find processing_time key')
-    #exit(1)
+    exit(1)
   
   # convert to timedeltas
   proc_times = []
