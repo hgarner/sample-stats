@@ -2,3 +2,5 @@ data/*
 *.pyc
 *.swp
 *.swo
+*.csv
+*.json
