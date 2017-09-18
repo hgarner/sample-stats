@@ -18,7 +18,7 @@ def processCsv(csv_filename):
     samples = {}
 
     with csv_file:
-      reader = csv.DictReader(csv_file, restkey = 'additional_data', delimiter = ',')
+      reader = csv.DictReader(csv_file, restkey = 'additional_data', delimiter = '\t')
       for line in reader:
         if line['processing_time'] not in ['NULL', 'null', '', None]:
           for key, val in line.items():
@@ -103,7 +103,7 @@ if __name__ == '__main__':
     now = datetime.now()
     datestamp = '{now.day:0>2}{now.month:0>2}{now.year}'.format(now = now) 
 
-    output_filepath = re.sub('\.csv$', '_summarystats.{date}.json'.format(date = datestamp), input_filepath)
+    output_filepath = re.sub('\.csv$', '_summarystats.{date}.json'.format(date = datestamp), input_filename)
 
     if args.output_dir is not None:
       output_dir = args.output_dir
