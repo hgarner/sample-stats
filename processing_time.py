@@ -68,6 +68,24 @@ def summaryStats(samples):
       }
     }
 
+# split sample set by study_no col
+# return dict of {study_no: [sample1, sample2, ...], ...}
+def splitByStudy(samples):
+  if 'study_no' not in samples.keys():
+    raise KeyError('study_no must be in samples data')
+
+  samples_bystudy = {}
+
+  for index, study_no in enumerate(samples['study_no']):
+    if study_no not in samples_bystudy.keys():
+      samples_bystudy[study_no] = {}
+    for key in samples.keys():
+      if key not in samples_bystudy[study_no].keys():
+        samples_bystudy[study_no][key] = []
+      samples_bystudy[study_no][key].append(samples[key][index])
+
+  return samples_bystudy
+
 def loadConfig(config_filename = '', config = None):
   root_dir = os.getcwd()
   if config is None:
@@ -95,7 +113,11 @@ if __name__ == '__main__':
     input_filepath = os.path.abspath(args.input_filename)
     input_filename = os.path.split(os.path.abspath(input_filepath))[1]
     samples = processCsv(input_filepath)
-    summary = summaryStats(samples)
+    samples = splitByStudy(samples)
+    summary = {}
+    for study_no, sampleset in samples.items():
+      summary[study_no] = summaryStats(samples[study_no])
+
     summary['input_filename'] = input_filename
 
     # dump the data to a file
