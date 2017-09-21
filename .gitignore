@@ -4,3 +4,4 @@ data/*
 *.swo
 *.csv
 *.json
+*.ini

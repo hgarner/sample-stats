@@ -34,6 +34,23 @@ def processCsv(csv_filename):
   
 def summaryStats(samples):
   ##
+  # check if any samples to ignore
+  #
+
+  ignore_indexes = []
+  ignore = {}
+
+  try:
+    ignore_sam_codes = config['exclude']['ignore_sam_codes'].split(',')
+    ignore['sam_codes'] = ignore_sam_codes
+    
+    for index, sam_code in enumerate(samples['sam_code']):
+      if sam_code in ignore_sam_codes:
+        ignore_indexes.append(index)
+  except (KeyError, TypeError):
+    pass
+
+  ##
   # first do processing times
   ##
   try:
@@ -44,9 +61,10 @@ def summaryStats(samples):
   
   # convert to timedeltas
   proc_times = []
-  for str_time in raw_proc_times:
-    time = [int(t) for t in str_time.split(':')]
-    proc_times.append((timedelta(hours = time[0], minutes = time[1], seconds = time[2])).total_seconds())
+  for index, str_time in enumerate(raw_proc_times):
+    if index not in ignore_indexes:
+      time = [int(t) for t in str_time.split(':')]
+      proc_times.append((timedelta(hours = time[0], minutes = time[1], seconds = time[2])).total_seconds())
 
   proc_times.sort()
 
@@ -64,7 +82,8 @@ def summaryStats(samples):
       'proc_times': {
         'units': 'seconds',
         'mean': proc_avg,
-        '95_cent': proc_95_cent
+        '95_cent': proc_95_cent,
+        'exclude': ignore
       }
     }
 
@@ -86,7 +105,7 @@ def splitByStudy(samples):
 
   return samples_bystudy
 
-def loadConfig(config_filename = '', config = None):
+def load_config(config_filename = '', config = None):
   root_dir = os.getcwd()
   if config is None:
     config = configparser.ConfigParser()
@@ -94,7 +113,6 @@ def loadConfig(config_filename = '', config = None):
   return config
 
 if __name__ == '__main__':
-  global config 
   path_to_script = os.path.abspath(sys.argv[0])
   root_dir = os.path.dirname(os.path.dirname(path_to_script))
 
@@ -104,6 +122,8 @@ if __name__ == '__main__':
   parser.add_argument('--config', dest='config_filename', action='store', help='optional config .ini file')
   global args
   args = parser.parse_args()
+  global config 
+  config = None
   try:
     config = load_config(args.config_filename, config)
   except:
