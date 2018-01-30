@@ -95,13 +95,91 @@ def splitByStudy(samples):
 
   samples_bystudy = {}
 
-  for index, study_no in enumerate(samples['study_no']):
-    if study_no not in samples_bystudy.keys():
-      samples_bystudy[study_no] = {}
+  ##
+  # generate the data structure
+  #
+  # dict of {study_no: {subset1: {sam_codes: [123, 456, ...], samples: {samplesdict}, ...}}
+  # 
+
+  # get a unique list (set) of all the study_no's
+
+  study_nos = set(samples['study_no'])
+
+  # get a unique list (set) of all the sam_code's
+
+  sam_codes = set(samples['sam_code'])
+
+  # get a unique set of tuples of (sam_code, study_no)
+
+  sam_codes_bystudy = set(zip(samples['sam_code'], samples['study_no']))
+  
+  # generate the initial data structure of {study_no_1: {}, study_no_2: {}...}
+
+  samples_bystudy = {study_no: {} for study_no in study_nos}
+
+  ##
+  # check if some sam_codes should be separated from bulk of study data
+  #
+
+  # if there is a config setting for separating a group of sam_codes
+  # from the rest of the study data, make sure we do this
+  # if not, use the key 'all_relevant'
+
+  subset_structure = {
+    'sam_codes': [],
+    'samples': {field_name: [] for field_name in samples.keys()},
+  }
+
+  # set up lookup for sam_code to point to relevant samples array 
+  sam_codes_lookup = {}
+
+  ##
+  # for each study we need to build a target data structure and
+  # lookups for quickly assigning samples to sam_code/study_no 
+  # locations
+  #
+
+  for study_no in study_nos:
+
+    this_study_sam_codes = [study_code for study_code in sam_codes_bystudy if study_code[1] == study_no]  
+
+    # see if we can get any subset structure specified in the config
+    try:
+      # add any subsetted sam_code/study_no combinations to sam_codes_lookup
+      separate_sam_codes = json.loads(config['study_subsets'][study_no])
+      
+      for subset_name, subset_codes in separate_sam_codes.items():
+        samples_bystudy[study_no][subset_name] = deepcopy(subset_structure)
+
+        for subset_code in subset_codes:
+          samples_bystudy[study_no][subset_name]['sam_codes'].append(subset_code)
+          sam_codes_lookup[(subset_code, study_no)] = samples_bystudy[study_no][subset_name]['samples']
+
+    except (KeyError, TypeError) as e:
+      samples_bystudy[study_no]['all_relevant'] = deepcopy(subset_structure)
+
+    # now add any unused sam_code/study_no combinations to sam_codes_lookup
+    # which point to the 'all_relevant' (i.e. default) subset
+
+    samples_bystudy[study_no]['all_relevant'] = deepcopy(subset_structure)
+
+    for sam_code_study in this_study_sam_codes:
+      if sam_code_study not in sam_codes_lookup.keys():
+        samples_bystudy[study_no]['all_relevant']['sam_codes'].append(sam_code_study[0])
+        sam_codes_lookup[sam_code_study] = samples_bystudy[study_no]['all_relevant']['samples']
+
+  ##
+  # split the samples 
+  #
+
+  for index, sam_code in enumerate(samples['sam_code']):
+
+    study_no = samples['study_no'][index]
+
     for key in samples.keys():
-      if key not in samples_bystudy[study_no].keys():
-        samples_bystudy[study_no][key] = []
-      samples_bystudy[study_no][key].append(samples[key][index])
+      if key not in sam_codes_lookup[(sam_code, study_no)].keys():
+        sam_codes_lookup[(sam_code, study_no)][key] = []
+      sam_codes_lookup[(sam_code, study_no)][key].append(samples[key][index])
 
   return samples_bystudy
 
@@ -132,11 +210,22 @@ if __name__ == '__main__':
   if args.input_filename is not None:
     input_filepath = os.path.abspath(args.input_filename)
     input_filename = os.path.split(os.path.abspath(input_filepath))[1]
+    
+    # process the csv into dict of {field_name_1: [data1, data2, etc], ...}
     samples = processCsv(input_filepath)
+
+    # split the dataset into dict 
+    # of {study_no_1: {field_name_1: [data1, etc], ...}, study_no_2: {...}}
     samples = splitByStudy(samples)
     summary = {}
+
+    # generate summary stats by study
     for study_no, sampleset in samples.items():
-      summary[study_no] = summaryStats(samples[study_no])
+      for subset_name, subset_data in sampleset.items():
+        if len(subset_data['samples']['sam_code']) > 0:
+          summary['{study_no}_{subset_name}'.format(study_no=study_no, subset_name=subset_name)] = summaryStats(subset_data['samples'])
+        else:
+          summary['{study_no}_{subset_name}'.format(study_no=study_no, subset_name=subset_name)] = 0
 
     summary['input_filename'] = input_filename
 
@@ -157,6 +246,12 @@ if __name__ == '__main__':
 
     print('summary_stats: successfully output to {output_filepath}'.format(output_filepath = output_filepath))
     exit(0)
+
+    # generate some graphs of mean value over time
+    try:
+      create_js.createLoadDataJs(output_dir, '^all\-studies\-sample\-processing\-time.*?\.json$', 'load_data.js.template', './')
+    except:
+      print('error creating load_data.js')
 
   else:
     print('--input argument missing: please specify a csv file to process')

@@ -1,2 +1,20 @@
 [exclude]
+# ignore_sam_codes specifies a comma separated list of sam_codes to 
+# completely remove from the output summary
 ignore_sam_codes = 2016,2017
+
+[study_subsets]
+# study subsets are a way to break up the output by specific sam_codes
+# if a sam_code is not listed here for a study, the sample will be put 
+# under 'all_relevant'
+#
+# format:
+# n.b. the subsets data is specified as a json object
+# study_no = {
+#     "subset_1": ["sam_code_1", "sam_code_2", ...],
+#     "subset_2": ...
+#   }
+30 = {
+    "serum": ["2020"],
+    "saliva": ["2021","2022"]
+  }
