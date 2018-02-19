@@ -35,8 +35,8 @@ function renderGraph(datapoints, study) {
   x.domain(d3.extent(datapoints[study], function(d) { return d.date; }));
   y.domain([3000, d3.max(datapoints[study], function(d) { return d.mean; })]);
 
-  console.log(x.domain());
-  console.log(y.domain());
+  //console.log(x.domain());
+  //console.log(y.domain());
 
   let svg = graph.append("svg")
     .attr("width", width)
@@ -45,15 +45,14 @@ function renderGraph(datapoints, study) {
     .attr("transform", "translate(50, 50)");
 
   //add the path for the values
-  console.log(val_line);
   let line_string = val_line(datapoints[study]);
-  console.log(line_string);
+  //console.log(line_string);
   svg.append("path")
     .data([datapoints[study]])
     .attr("d", val_line)
     .attr("class", "line");
-  console.log(svg);
-  console.log(graph);
+  //console.log(svg);
+  //console.log(graph);
 
   //add the axes
   svg.append("g")
@@ -70,7 +69,7 @@ function renderGraph(datapoints, study) {
 }
 
 function processData(data) {
-  console.log(data);
+  //console.log(data);
 
   let datapoints = {};
 
@@ -105,67 +104,6 @@ function processData(data) {
   for (let study in datapoints) {
     renderGraph(datapoints, study)
   }
-  
-  /*
-  let data_27 = datapoints['27'];
-
-  //parse the date of each entry
-  data_27.forEach(function(d) {
-    d.date = date_parser(d.date);
-  });
-
-  //sort by date
-  data_27.sort(function(a, b) {
-    if (a.date < b.date) {
-      return -1;
-    }
-    if (a.date > b.date) {
-      return 1;
-    }
-    return 0;
-  });
-
-  let val_line = d3.line()
-    .x(function(d) { console.log(d.date); return x(d.date); })
-    .y(function(d) { console.log(d.mean); return y(d.mean); });
-
-  x.domain(d3.extent(data_27, function(d) { return d.date; }));
-  y.domain([3000, d3.max(data_27, function(d) { return d.mean; })]);
-
-  console.log(x.domain());
-  console.log(y.domain());
-
-  let svg = graph.append("svg")
-    .attr("width", width)
-    .attr("height", height)
-    .append("g")
-    .attr("transform", "translate(50, 50)");
-
-  //add the path for the values
-  console.log(val_line);
-  let line_string = val_line(data_27);
-  console.log(line_string);
-  svg.append("path")
-    .data([data_27])
-    .attr("d", val_line)
-    .attr("class", "line");
-  console.log(svg);
-  console.log(graph);
-
-  //add the axes
-  svg.append("g")
-    .attr("transform", "translate(0, "+(height-100)+")")
-    .call(d3.axisBottom(x));
-  svg.append("g")
-    .call(d3.axisLeft(y));
-
-  //add title
-  svg.append("g")
-    .attr("transform", "translate(0, -10)")
-    .append("text")
-    .text("study 27");
-
-  */
 }
 
 function passData(parse_error, node_data) {
