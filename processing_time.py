@@ -245,14 +245,16 @@ if __name__ == '__main__':
       json.dump(summary, output, indent=2)
 
     print('summary_stats: successfully output to {output_filepath}'.format(output_filepath = output_filepath))
-    exit(0)
 
     # generate some graphs of mean value over time
     try:
       create_js.createLoadDataJs(output_dir, '^all\-studies\-sample\-processing\-time.*?\.json$', 'load_data.js.template', './')
+      print('summary_stats: created load_data.js'
     except:
-      print('error creating load_data.js')
+      print('summary_stats: error creating load_data.js')
+      exit(1)
 
+    exit(0)
   else:
     print('--input argument missing: please specify a csv file to process')
     exit(1)
