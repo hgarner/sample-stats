@@ -10,6 +10,7 @@ from pprint import pprint
 from datetime import timedelta, datetime
 from numpy import average, percentile
 import json
+import create_js
 
 def processCsv(csv_filename):
   try:
@@ -252,6 +253,7 @@ if __name__ == '__main__':
       print('summary_stats: created load_data.js')
     except:
       print('summary_stats: error creating load_data.js')
+      raise
       exit(1)
 
     exit(0)
