@@ -11,6 +11,7 @@ from datetime import timedelta, datetime
 from numpy import average, percentile
 import json
 import create_js
+from shutil import copy
 
 def processCsv(csv_filename):
   try:
@@ -249,10 +250,21 @@ if __name__ == '__main__':
 
     # generate some graphs of mean value over time
     try:
-      create_js.createLoadDataJs(output_dir, '^all\-studies\-sample\-processing\-time.*?\.json$', 'load_data.js.template', './')
+      create_js.createLoadDataJs(output_dir, '^all\-studies\-sample\-processing\-time.*?\.json$', 'load_data.js.template', os.path.split(os.path.abspath(output_dir))[0])
       print('summary_stats: created load_data.js')
     except:
       print('summary_stats: error creating load_data.js')
+      raise
+      exit(1)
+
+    # copy processing_time_graph.html and render_stats.js 
+    # to dir above output_dir
+    try:
+      copy('./processing_time_graph.html', os.path.join(os.path.split(os.path.abspath(output_dir))[0], 'processing_time_graph.html'))
+      copy('./render_stats.js', os.path.join(os.path.split(os.path.abspath(output_dir))[0], 'render_stats.js'))
+      print('summary_stats: copied processing_time_graph.html and render_stats.js to output_dir')
+    except:
+      print('summary_stats: error copying processing_time_graph.html/render_stats.js to output_dir')
       raise
       exit(1)
 
