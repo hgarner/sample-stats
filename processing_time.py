@@ -249,7 +249,7 @@ if __name__ == '__main__':
     # generate some graphs of mean value over time
     try:
       create_js.createLoadDataJs(output_dir, '^all\-studies\-sample\-processing\-time.*?\.json$', 'load_data.js.template', './')
-      print('summary_stats: created load_data.js'
+      print('summary_stats: created load_data.js')
     except:
       print('summary_stats: error creating load_data.js')
       exit(1)
@@ -258,8 +258,3 @@ if __name__ == '__main__':
   else:
     print('--input argument missing: please specify a csv file to process')
     exit(1)
-
-
-
-
-
