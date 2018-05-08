@@ -33,7 +33,11 @@ function renderGraph(datapoints, study) {
     .y(function(d) { console.log(d.mean); return y(d.mean); });
 
   x.domain(d3.extent(datapoints[study], function(d) { return d.date; }));
-  y.domain([3000, d3.max(datapoints[study], function(d) { return d.mean; })]);
+  //y.domain([3000, d3.max(datapoints[study], function(d) { return d.mean; })]);
+  //set a max y val of the max value of the means or 5000 (whichever is
+  //larger)
+  //avoids issues with very small changes looking significant on the graph
+  y.domain([3000, Math.max(5000, d3.max(datapoints[study], function(d) { return d.mean; }))]);
 
   //console.log(x.domain());
   //console.log(y.domain());

@@ -89,35 +89,35 @@ def summaryStats(samples):
       }
     }
 
-# split sample set by study_no col
-# return dict of {study_no: [sample1, sample2, ...], ...}
+# split sample set by short_code col
+# return dict of {short_code: [sample1, sample2, ...], ...}
 def splitByStudy(samples):
-  if 'study_no' not in samples.keys():
-    raise KeyError('study_no must be in samples data')
+  if 'short_code' not in samples.keys():
+    raise KeyError('short_code must be in samples data')
 
   samples_bystudy = {}
 
   ##
   # generate the data structure
   #
-  # dict of {study_no: {subset1: {sam_codes: [123, 456, ...], samples: {samplesdict}, ...}}
+  # dict of {short_code: {subset1: {sam_codes: [123, 456, ...], samples: {samplesdict}, ...}}
   # 
 
-  # get a unique list (set) of all the study_no's
+  # get a unique list (set) of all the short_code's
 
-  study_nos = set(samples['study_no'])
+  short_codes = set(samples['short_code'])
 
   # get a unique list (set) of all the sam_code's
 
   sam_codes = set(samples['sam_code'])
 
-  # get a unique set of tuples of (sam_code, study_no)
+  # get a unique set of tuples of (sam_code, short_code)
 
-  sam_codes_bystudy = set(zip(samples['sam_code'], samples['study_no']))
+  sam_codes_bystudy = set(zip(samples['sam_code'], samples['short_code']))
   
-  # generate the initial data structure of {study_no_1: {}, study_no_2: {}...}
+  # generate the initial data structure of {short_code_1: {}, short_code_2: {}...}
 
-  samples_bystudy = {study_no: {} for study_no in study_nos}
+  samples_bystudy = {short_code: {} for short_code in short_codes}
 
   ##
   # check if some sam_codes should be separated from bulk of study data
@@ -137,38 +137,38 @@ def splitByStudy(samples):
 
   ##
   # for each study we need to build a target data structure and
-  # lookups for quickly assigning samples to sam_code/study_no 
+  # lookups for quickly assigning samples to sam_code/short_code 
   # locations
   #
 
-  for study_no in study_nos:
+  for short_code in short_codes:
 
-    this_study_sam_codes = [study_code for study_code in sam_codes_bystudy if study_code[1] == study_no]  
+    this_study_sam_codes = [study_code for study_code in sam_codes_bystudy if study_code[1] == short_code]  
 
     # see if we can get any subset structure specified in the config
     try:
-      # add any subsetted sam_code/study_no combinations to sam_codes_lookup
-      separate_sam_codes = json.loads(config['study_subsets'][study_no])
+      # add any subsetted sam_code/short_code combinations to sam_codes_lookup
+      separate_sam_codes = json.loads(config['study_subsets'][short_code])
       
       for subset_name, subset_codes in separate_sam_codes.items():
-        samples_bystudy[study_no][subset_name] = deepcopy(subset_structure)
+        samples_bystudy[short_code][subset_name] = deepcopy(subset_structure)
 
         for subset_code in subset_codes:
-          samples_bystudy[study_no][subset_name]['sam_codes'].append(subset_code)
-          sam_codes_lookup[(subset_code, study_no)] = samples_bystudy[study_no][subset_name]['samples']
+          samples_bystudy[short_code][subset_name]['sam_codes'].append(subset_code)
+          sam_codes_lookup[(subset_code, short_code)] = samples_bystudy[short_code][subset_name]['samples']
 
     except (KeyError, TypeError) as e:
-      samples_bystudy[study_no]['all_relevant'] = deepcopy(subset_structure)
+      samples_bystudy[short_code]['all_relevant'] = deepcopy(subset_structure)
 
-    # now add any unused sam_code/study_no combinations to sam_codes_lookup
+    # now add any unused sam_code/short_code combinations to sam_codes_lookup
     # which point to the 'all_relevant' (i.e. default) subset
 
-    samples_bystudy[study_no]['all_relevant'] = deepcopy(subset_structure)
+    samples_bystudy[short_code]['all_relevant'] = deepcopy(subset_structure)
 
     for sam_code_study in this_study_sam_codes:
       if sam_code_study not in sam_codes_lookup.keys():
-        samples_bystudy[study_no]['all_relevant']['sam_codes'].append(sam_code_study[0])
-        sam_codes_lookup[sam_code_study] = samples_bystudy[study_no]['all_relevant']['samples']
+        samples_bystudy[short_code]['all_relevant']['sam_codes'].append(sam_code_study[0])
+        sam_codes_lookup[sam_code_study] = samples_bystudy[short_code]['all_relevant']['samples']
 
   ##
   # split the samples 
@@ -176,12 +176,12 @@ def splitByStudy(samples):
 
   for index, sam_code in enumerate(samples['sam_code']):
 
-    study_no = samples['study_no'][index]
+    short_code = samples['short_code'][index]
 
     for key in samples.keys():
-      if key not in sam_codes_lookup[(sam_code, study_no)].keys():
-        sam_codes_lookup[(sam_code, study_no)][key] = []
-      sam_codes_lookup[(sam_code, study_no)][key].append(samples[key][index])
+      if key not in sam_codes_lookup[(sam_code, short_code)].keys():
+        sam_codes_lookup[(sam_code, short_code)][key] = []
+      sam_codes_lookup[(sam_code, short_code)][key].append(samples[key][index])
 
   return samples_bystudy
 
@@ -217,17 +217,17 @@ if __name__ == '__main__':
     samples = processCsv(input_filepath)
 
     # split the dataset into dict 
-    # of {study_no_1: {field_name_1: [data1, etc], ...}, study_no_2: {...}}
+    # of {short_code_1: {field_name_1: [data1, etc], ...}, short_code_2: {...}}
     samples = splitByStudy(samples)
     summary = {}
 
     # generate summary stats by study
-    for study_no, sampleset in samples.items():
+    for short_code, sampleset in samples.items():
       for subset_name, subset_data in sampleset.items():
         if len(subset_data['samples']['sam_code']) > 0:
-          summary['{study_no}_{subset_name}'.format(study_no=study_no, subset_name=subset_name)] = summaryStats(subset_data['samples'])
+          summary['{short_code}_{subset_name}'.format(short_code=short_code, subset_name=subset_name)] = summaryStats(subset_data['samples'])
         else:
-          summary['{study_no}_{subset_name}'.format(study_no=study_no, subset_name=subset_name)] = 0
+          summary['{short_code}_{subset_name}'.format(short_code=short_code, subset_name=subset_name)] = 0
 
     summary['input_filename'] = input_filename
 

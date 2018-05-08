@@ -10,11 +10,11 @@ ignore_sam_codes = 2016,2017
 #
 # format:
 # n.b. the subsets data is specified as a json object
-# study_no = {
+# short_code = {
 #     "subset_1": ["sam_code_1", "sam_code_2", ...],
 #     "subset_2": ...
 #   }
-30 = {
+SHORTCODE = {
     "serum": ["2020"],
     "saliva": ["2021","2022"]
   }
