@@ -351,10 +351,6 @@ if __name__ == '__main__':
 
     # generate summary stats by study and month/year
 
-    # dump a logfile of samples object for debugging
-    with open('samples_dump', 'w') as samples_dump:
-      pprint(samples, samples_dump)
-
     for short_code, sampleset in samples.items():
       for subset_name, subset_data in sampleset.items():
         if len(subset_data['samples']['sam_code']) > 0:
@@ -369,7 +365,6 @@ if __name__ == '__main__':
 
     summary['input_filename'] = input_filename
     pivot_summary['input_filename'] = input_filename
-    pprint(pivot_summary)
 
     # dump the data to a file 
 
