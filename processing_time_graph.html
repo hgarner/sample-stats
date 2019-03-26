@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<html>
+  <script src="https://d3js.org/d3.v4.min.js"></script>
+  <head>
+    <title>Sample processing times</title>
+    <style> 
+      .line { 
+          fill: none; 
+              stroke: steelblue; 
+                  stroke-width: 2px; 
+      } 
+    </style>
+  </head>
+  <body>
+    <div id="graph">
+    </div>
+  </body>
+  <script src="load_data.js"></script>
+  <script src="render_stats.js"></script>
+  <script>
+    loadData();
+  </script>
+</html>

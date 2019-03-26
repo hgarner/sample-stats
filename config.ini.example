@@ -1,2 +1,37 @@
 [exclude]
+# ignore_sam_codes specifies a comma separated list of sam_codes to 
+# completely remove from the output summary
 ignore_sam_codes = 2016,2017
+
+[study_subsets]
+# study subsets are a way to break up the output by specific sam_codes
+# if a sam_code is not listed here for a study, the sample will be put 
+# under 'all_relevant'
+# 'target_time' is target processing time in minutes
+#
+# format:
+# n.b. the subsets data is specified as a json object
+# short_code = {
+#     "subset_1": {
+#        "sam_codes": ["sam_code_1", "sam_code_2", ...],
+#        "target_time": 90
+#     "subset_2": ...
+#   }
+SHORTCODE = {
+    "serum": {
+      "sam_codes": ["2020"],
+      "target_time": 90
+    },
+    "saliva": {
+      "sam_codes": ["2021","2022"],
+      "target_time": 120
+    }
+  }
+  
+[studies]
+# define default settings for a study (by short_code)
+# data is specified as json object
+# currently supports "target_time" (mins)
+SHORTCODE = {
+    "target_time": "90"
+  }

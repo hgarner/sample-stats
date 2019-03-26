@@ -1,0 +1,8 @@
+function loadData() {{
+  var data_queue = d3.queue();
+
+  data_queue
+    {include_files}
+    .awaitAll(passData);
+
+}}
